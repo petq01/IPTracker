@@ -30,7 +30,6 @@ public class IPTrack {
 
         // String out is used to store output of this command(process)
         String out = "";
-
         while (true) {
             String l = null;
             try {
@@ -76,21 +75,21 @@ public class IPTrack {
         System.out.println("\n ------------------------ \n\n " + date + "\n\n\n");
         for (String ip : ipNames) {
 
-            Process nsProcess = Runtime.getRuntime().exec("nslookup " + ip);
-            BufferedReader brNs = new BufferedReader(new InputStreamReader(nsProcess.getInputStream()));
-
-            Process physicalAddr = Runtime.getRuntime().exec("arp -a " + ip);
-            BufferedReader brPsyhical = new BufferedReader(new InputStreamReader(physicalAddr.getInputStream()));
-            String l = null;
+            BufferedReader brNs = null;
+            BufferedReader brPsyhical = null;
+            String ns = null;
             String a = null;
-            printCommand(l, brNs);
-            printCommand(a, brPsyhical);
+            printCommand(ns, brNs, "nslookup ", ip);
+            printCommand(a, brPsyhical, "arp -a ", ip);
 
         }
 
     }
 
-    public static void printCommand(String l, BufferedReader br) {
+    public static void printCommand(String l, BufferedReader br, String execString, String ip) throws IOException {
+        Process nsProcess = Runtime.getRuntime().exec(execString + ip);
+        br = new BufferedReader(new InputStreamReader(nsProcess.getInputStream()));
+
         while (true) {
             try {
                 l = br.readLine();
@@ -98,7 +97,7 @@ public class IPTrack {
             }
             System.out.println(l);
             if (l == null) {
-                System.out.println("----");
+                System.out.println("\n ---- \n");
                 break;
             }
         }
@@ -106,6 +105,7 @@ public class IPTrack {
             br.close();
         } catch (IOException ex) {
         }
+
     }
 
 }
