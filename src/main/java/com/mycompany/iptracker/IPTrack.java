@@ -1,8 +1,3 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 package com.mycompany.iptracker;
 
 import java.io.BufferedReader;
@@ -20,7 +15,7 @@ import java.util.regex.Pattern;
  */
 public class IPTrack {
 
-    public static void main(String[] args) throws Exception {
+    public static void main(String[] args) throws IOException {
         Date date = new Date();
         List<String> ipNames = new ArrayList<>();
 
@@ -35,6 +30,7 @@ public class IPTrack {
             try {
                 l = brArp.readLine();
             } catch (IOException ex) {
+                ex.printStackTrace();
             }
             if (l == null) {
                 break;
@@ -44,7 +40,8 @@ public class IPTrack {
 
         // A compiled representation of a regular expression
         Pattern pattern
-                = Pattern.compile(".*\\b\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}\\b");
+                = Pattern.compile("192\\.168\\.\\d{1,3}.\\d{1,3}");
+        // .*\\b\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}\\b  -> all ip dynamic & static
 
         /* An engine that performs match operations on a character sequence by interpreting a Pattern */
         Matcher match = pattern.matcher(out);
@@ -75,35 +72,33 @@ public class IPTrack {
         System.out.println("\n ------------------------ \n\n " + date + "\n\n\n");
         for (String ip : ipNames) {
 
-            BufferedReader brNs = null;
-            BufferedReader brPsyhical = null;
-            String ns = null;
-            String a = null;
-            printCommand(ns, brNs, "nslookup ", ip);
-            printCommand(a, brPsyhical, "arp -a ", ip);
+            printCommand("nslookup ", ip, "");
+            printCommand("arp -a ", ip, "---");
 
         }
 
     }
 
-    public static void printCommand(String l, BufferedReader br, String execString, String ip) throws IOException {
+    public static void printCommand(String execString, String ip, String endline) throws IOException {
         Process nsProcess = Runtime.getRuntime().exec(execString + ip);
-        br = new BufferedReader(new InputStreamReader(nsProcess.getInputStream()));
-
+        BufferedReader br = new BufferedReader(new InputStreamReader(nsProcess.getInputStream()));
+        String outputString = null;
         while (true) {
             try {
-                l = br.readLine();
+                outputString = br.readLine();
             } catch (IOException ex) {
+                ex.printStackTrace();
             }
-            System.out.println(l);
-            if (l == null) {
-                System.out.println("\n ---- \n");
+            System.out.println(outputString);
+            if (outputString == null) {
+                System.out.println(endline);
                 break;
             }
         }
         try {
             br.close();
         } catch (IOException ex) {
+            ex.printStackTrace();
         }
 
     }
